@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ontology Visualizer</title>
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <style>
+    :root { --bg: #11161d; --panel: #1b2330; --text: #e6edf3; --muted: #8b98a9; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    header { padding: 12px 16px; background: var(--panel); border-bottom: 1px solid #2a3545; }
+    header h1 { margin: 0; font-size: 16px; }
+    header p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+    #legend { display: flex; gap: 16px; font-size: 12px; margin-top: 8px; flex-wrap: wrap; }
+    .key { display: inline-flex; align-items: center; gap: 6px; }
+    .swatch { width: 12px; height: 12px; border-radius: 3px; }
+    #net { height: calc(100% - 96px); }
+    #error { color: #ff7b72; padding: 16px; font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">Ontology Visualizer</h1>
+    <p id="subtitle">Loading…</p>
+    <div id="legend">
+      <span class="key"><span class="swatch" style="background:#4f9cf9"></span> Class</span>
+      <span class="key"><span class="swatch" style="background:#56d364"></span> Individual</span>
+      <span class="key"><span class="swatch" style="background:#8b98a9"></span> subClassOf / type</span>
+      <span class="key"><span class="swatch" style="background:#d2a8ff"></span> relation</span>
+    </div>
+  </header>
+  <div id="net"></div>
+  <div id="error"></div>
+
+  <script>
+    const COLORS = {
+      class:      { background: '#1f3a5f', border: '#4f9cf9' },
+      individual: { background: '#163d24', border: '#56d364' }
+    };
+
+    async function main() {
+      let graph, onto;
+      try {
+        [graph, onto] = await Promise.all([
+          fetch('/api/graph').then(r => r.json()),
+          fetch('/api/ontology').then(r => r.json())
+        ]);
+        if (graph.error) throw new Error(graph.error);
+      } catch (e) {
+        document.getElementById('subtitle').textContent = 'Failed to load ontology.';
+        document.getElementById('error').textContent = String(e.message || e);
+        return;
+      }
+
+      const meta = onto.metadata || {};
+      document.getElementById('title').textContent = meta.title || 'Ontology Visualizer';
+      document.getElementById('subtitle').textContent =
+        (meta.description || '') +
+        `  —  ${graph.nodes.length} nodes, ${graph.edges.length} edges`;
+
+      const nodes = graph.nodes.map(n => ({
+        ...n,
+        shape: n.group === 'individual' ? 'dot' : 'box',
+        color: COLORS[n.group] || COLORS.class
+      }));
+
+      const edges = graph.edges.map(e => ({
+        ...e,
+        color: { color: structuralEdge(e) ? '#8b98a9' : '#d2a8ff' },
+        font: { color: '#c9d4e0', size: 11, strokeWidth: 0 },
+        smooth: { type: 'continuous' }
+      }));
+
+      function structuralEdge(e) {
+        return e.relation === 'subClassOf' || e.relation === 'type';
+      }
+
+      const container = document.getElementById('net');
+      new vis.Network(container, { nodes, edges }, {
+        nodes: { font: { color: '#e6edf3', size: 14 }, borderWidth: 2 },
+        edges: { arrows: { to: { scaleFactor: 0.6 } } },
+        physics: { stabilization: true, barnesHut: { springLength: 140 } },
+        interaction: { hover: true, tooltipDelay: 120 }
+      });
+    }
+
+    main();
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "title": "Organization Ontology",
+    "description": "A tiny example modelling people, organizations and their relationships.",
+    "version": "1.0.0"
+  },
+  "classes": [
+    { "id": "Thing", "label": "Thing", "comment": "Root of the hierarchy.", "subClassOf": null },
+    { "id": "Agent", "label": "Agent", "comment": "Something that can act.", "subClassOf": "Thing" },
+    { "id": "Person", "label": "Person", "comment": "A human being.", "subClassOf": "Agent" },
+    { "id": "Organization", "label": "Organization", "comment": "A company or institution.", "subClassOf": "Agent" },
+    { "id": "Employee", "label": "Employee", "comment": "A person employed by an organization.", "subClassOf": "Person" },
+    { "id": "Project", "label": "Project", "comment": "A unit of work.", "subClassOf": "Thing" }
+  ],
+  "relations": [
+    { "id": "worksFor", "label": "works for", "domain": "Employee", "range": "Organization" },
+    { "id": "manages", "label": "manages", "domain": "Employee", "range": "Project" },
+    { "id": "ownedBy", "label": "owned by", "domain": "Project", "range": "Organization" },
+    { "id": "knows", "label": "knows", "domain": "Person", "range": "Person" }
+  ],
+  "individuals": [
+    { "id": "alice", "label": "Alice", "type": "Employee" },
+    { "id": "bob", "label": "Bob", "type": "Employee" },
+    { "id": "acme", "label": "Acme Corp", "type": "Organization" },
+    { "id": "apollo", "label": "Project Apollo", "type": "Project" }
+  ],
+  "assertions": [
+    { "subject": "alice", "predicate": "worksFor", "object": "acme" },
+    { "subject": "bob", "predicate": "worksFor", "object": "acme" },
+    { "subject": "alice", "predicate": "manages", "object": "apollo" },
+    { "subject": "apollo", "predicate": "ownedBy", "object": "acme" },
+    { "subject": "alice", "predicate": "knows", "object": "bob" }
+  ]
+}

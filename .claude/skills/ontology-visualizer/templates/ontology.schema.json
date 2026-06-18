@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ontology",
+  "description": "A pragmatic JSON ontology: classes, relations, individuals, assertions.",
+  "type": "object",
+  "required": ["classes"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "classes": {
+      "type": "array",
+      "description": "Concepts/types in the domain.",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Unique class identifier." },
+          "label": { "type": "string", "description": "Human-readable name (defaults to id)." },
+          "comment": { "type": "string", "description": "Definition / description." },
+          "subClassOf": {
+            "type": ["string", "null"],
+            "description": "id of the parent class, or null for a top-level class."
+          }
+        }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "description": "Named relationship types between classes (object properties).",
+      "items": {
+        "type": "object",
+        "required": ["id", "domain", "range"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "comment": { "type": "string" },
+          "domain": { "type": "string", "description": "Source class id." },
+          "range": { "type": "string", "description": "Target class id." }
+        }
+      }
+    },
+    "individuals": {
+      "type": "array",
+      "description": "Concrete instances of classes.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "type": { "type": "string", "description": "id of the class this is an instance of." }
+        }
+      }
+    },
+    "assertions": {
+      "type": "array",
+      "description": "Facts linking individuals via relations (subject-predicate-object).",
+      "items": {
+        "type": "object",
+        "required": ["subject", "predicate", "object"],
+        "additionalProperties": false,
+        "properties": {
+          "subject": { "type": "string", "description": "individual id." },
+          "predicate": { "type": "string", "description": "relation id." },
+          "object": { "type": "string", "description": "individual id." }
+        }
+      }
+    }
+  }
+}
