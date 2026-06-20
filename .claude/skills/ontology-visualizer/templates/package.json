@@ -1,0 +1,11 @@
+{
+  "name": "ontology-viz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive visualizer for a JSON ontology (zero runtime dependencies).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "validate": "node -e \"require('./graph').toGraph(require('./ontology.json')); console.log('ontology OK')\""
+  }
+}
